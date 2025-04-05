@@ -4,7 +4,6 @@ class Task {
   final bool isCompleted;
   final DateTime? startTime;
   final DateTime? endTime;
-  final List<Task>? subtasks;
   final String userId;
 
   Task({
@@ -13,7 +12,6 @@ class Task {
     this.isCompleted = false,
     this.startTime,
     this.endTime,
-    this.subtasks,
     required this.userId,
   });
 
@@ -24,7 +22,6 @@ class Task {
       'isCompleted': isCompleted,
       'startTime': startTime?.toIso8601String(),
       'endTime': endTime?.toIso8601String(),
-      'subtasks': subtasks?.map((task) => task.toMap()).toList(),
       'userId': userId,
     };
   }
@@ -36,9 +33,6 @@ class Task {
       isCompleted: map['isCompleted'] ?? false,
       startTime: map['startTime'] != null ? DateTime.parse(map['startTime']) : null,
       endTime: map['endTime'] != null ? DateTime.parse(map['endTime']) : null,
-      subtasks: map['subtasks'] != null
-          ? (map['subtasks'] as List).map((task) => Task.fromMap(task)).toList()
-          : null,
       userId: map['userId'],
     );
   }

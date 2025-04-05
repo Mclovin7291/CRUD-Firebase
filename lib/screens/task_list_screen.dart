@@ -14,15 +14,12 @@ class TaskListScreen extends StatefulWidget {
 
 class _TaskListScreenState extends State<TaskListScreen> {
   final TextEditingController _taskController = TextEditingController();
-  final TextEditingController _subtaskController = TextEditingController();
   DateTime? _selectedStartTime;
   DateTime? _selectedEndTime;
-  String? _selectedParentTaskId;
 
   @override
   void dispose() {
     _taskController.dispose();
-    _subtaskController.dispose();
     super.dispose();
   }
 
@@ -64,21 +61,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
       setState(() {
         _selectedStartTime = null;
         _selectedEndTime = null;
-      });
-    }
-  }
-
-  void _addSubtask(String parentTaskId) {
-    if (_subtaskController.text.isNotEmpty) {
-      final subtask = Task(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        title: _subtaskController.text,
-        userId: context.read<AuthService>().currentUser!.uid,
-      );
-      context.read<TaskService>().addSubtask(parentTaskId, subtask);
-      _subtaskController.clear();
-      setState(() {
-        _selectedParentTaskId = null;
       });
     }
   }
@@ -162,72 +144,33 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     final task = tasks[index];
                     return Card(
                       margin: const EdgeInsets.all(8.0),
-                      child: ExpansionTile(
-                        title: Row(
-                          children: [
-                            Checkbox(
-                              value: task.isCompleted,
-                              onChanged: (value) {
-                                context
-                                    .read<TaskService>()
-                                    .updateTaskCompletion(task.id, value!);
-                              },
-                            ),
-                            Expanded(
-                              child: Text(
-                                task.title,
-                                style: TextStyle(
-                                  decoration: task.isCompleted
-                                      ? TextDecoration.lineThrough
-                                      : null,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () {
-                                context.read<TaskService>().deleteTask(task.id);
-                              },
-                            ),
-                          ],
+                      child: ListTile(
+                        leading: Checkbox(
+                          value: task.isCompleted,
+                          onChanged: (value) {
+                            context
+                                .read<TaskService>()
+                                .updateTaskCompletion(task.id, value!);
+                          },
+                        ),
+                        title: Text(
+                          task.title,
+                          style: TextStyle(
+                            decoration: task.isCompleted
+                                ? TextDecoration.lineThrough
+                                : null,
+                          ),
                         ),
                         subtitle: task.startTime != null && task.endTime != null
                             ? Text(
                                 '${DateFormat.jm().format(task.startTime!)} - ${DateFormat.jm().format(task.endTime!)}')
                             : null,
-                        children: [
-                          if (task.subtasks != null)
-                            ...task.subtasks!.map((subtask) => ListTile(
-                                  title: Text(subtask.title),
-                                  trailing: IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    onPressed: () {
-                                      // Implement subtask deletion
-                                    },
-                                  ),
-                                )),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: _subtaskController,
-                                    decoration: const InputDecoration(
-                                      hintText: 'Enter subtask',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                ElevatedButton(
-                                  onPressed: () => _addSubtask(task.id),
-                                  child: const Text('Add Subtask'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            context.read<TaskService>().deleteTask(task.id);
+                          },
+                        ),
                       ),
                     );
                   },

@@ -29,14 +29,4 @@ class TaskService {
   Future<void> deleteTask(String taskId) async {
     await _firestore.collection('tasks').doc(taskId).delete();
   }
-
-  Future<void> addSubtask(String parentTaskId, Task subtask) async {
-    final parentTaskRef = _firestore.collection('tasks').doc(parentTaskId);
-    final parentTask = await parentTaskRef.get();
-    final currentSubtasks = parentTask.data()?['subtasks'] ?? [];
-    
-    await parentTaskRef.update({
-      'subtasks': [...currentSubtasks, subtask.toMap()],
-    });
-  }
 }
